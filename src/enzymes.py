@@ -48,11 +48,6 @@ def chymotrypsin_cleave(seq):
     return cleave(seq, cut_after={"Y", "W", "F", "L", "M"}, block_if_next={"P"})
 
 
-def main():
-
-    print(trypsin_cleave("KMKAFLRGYV"))
-    print(chymotrypsin_cleave("AFYWLPGA"))
-
-
 if __name__ == "__main__":
-    main()
+    print(trypsin_cleave("KMKAFLRGYV"))
+    print(chymotrypsin_cleave("AFYMWLGA"))

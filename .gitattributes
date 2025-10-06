@@ -1,0 +1,2 @@
+# .gitattributes (plain text at repo root)
+*.ipynb linguist-detectable=false
