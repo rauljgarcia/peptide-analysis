@@ -1,8 +1,7 @@
 """
-enzymes.py
-
-Contains functions for peptide cleavage by proteases.
-Currently supports trypsin cleavage.
+A lightweight Python toolkit for simulating proteolytic cleavage of peptide sequences.
+Cleavage rules for trypsin and chymotrypsin are implemented using rule-based string
+processing to mimic enzymatic specificity in silico.
 """
 
 
