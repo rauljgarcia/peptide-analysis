@@ -38,15 +38,20 @@ def cleave(seq, *, cut_after, block_if_next=None):
 
 
 def trypsin_cleave(seq):
-    """Cleave peptide after K or R, unless followed by P."""
+    """
+    Cleaves peptide bonds on C-terminal side of K or R residues, unless followed by P.
+    """
     return cleave(seq, cut_after={"R", "K"}, block_if_next={"P"})
 
 
 def chymotrypsin_cleave(seq):
-    """Cleave peptide after Y, W, F, L, or M, unless followed by P."""
+    """
+    Cleaves peptide bonds on C-terminal side of large aromatic, hydrophobic residues
+    Y, W, F, (and secondarily, M, or  L), unless followed by P.
+    """
     return cleave(seq, cut_after={"Y", "W", "F", "L", "M"}, block_if_next={"P"})
 
 
 if __name__ == "__main__":
     print(trypsin_cleave("KMKAFLRGYV"))
-    print(chymotrypsin_cleave("AFYMWLGA"))
+    print(chymotrypsin_cleave("KMKAFLRGYV"))
