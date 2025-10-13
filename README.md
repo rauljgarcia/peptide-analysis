@@ -32,8 +32,8 @@ This framework could be extended to explore:
 • Noise/error simulation
 • Integration with MS-based approaches
 
-Project Structure
-
+## Project Structure
+```
 peptide-analysis/
 │
 ├── notebooks/
@@ -46,9 +46,10 @@ peptide-analysis/
 │
 ├── .gitignore
 └── README.md
+```
 
-Example Usage
-
+## Example Usage
+```
 from src.enzymes import trypsin_cleave
 from src.sequence_tools import validate_ordered_fragments
 
@@ -65,6 +66,7 @@ is_valid, details = validate_ordered_fragments(
     block_if_next={"P"}
 )
 print(is_valid, details)
+```
 
 Roadmap
 • Core cleavage functions
