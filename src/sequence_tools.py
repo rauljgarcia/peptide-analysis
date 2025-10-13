@@ -43,15 +43,67 @@ VALID_AMINO_ACIDS = {
 def validate_ordered_fragments(
     fragments: list[str], *, cut_after: set[str], block_if_next: set[str]
 ) -> tuple[bool, dict]:
+    """
+    Verifies valid fragments based on proper character for the amino acid, and valid
+    cut-off points
 
+    Parameters:
+    fragments: list[str] — ordered fragments
+    cut_after: set[str] — residues allowed at the end of each non-final fragment
+    block_if_next: set[str] — residues not allowed at the start of the following fragment
+
+    Returns:
+    tuple[bool, dict] — (is_valid, details)
+    dictionary: if False was returned, a message with the error type, and position
+        if True, an empty error type and the number of fragments that passed
+    """
+
+    fragments = list(map(str.upper, fragments))
+    cut_after = set(map(str.upper, cut_after))
+    block_if_next = set(map(str.upper, block_if_next))
+
+    if not fragments:
+        return False, {"error": "empty_fragment_list"}
+
+    # Check that each character in the fragment list is a valid amino acid
     for frag_index, frag in enumerate(fragments):
-        for char_index, aa in enumerate(frag):
-            if aa not in VALID_AMINO_ACIDS:
+        if frag == "":
+            return False, {
+                "error": "empty fragment",
+                "frag_index": frag_index,
+                "fragment": "",
+            }
+        for char_index, amin_ac in enumerate(frag):
+            if amin_ac not in VALID_AMINO_ACIDS:
                 return False, {
-                    "error": "invalid character",
+                    "error": "invalid_character",
+                    "char_index": char_index,
+                    "residue": amin_ac,
                     "fragment": frag,
-                    "position": char_index,
                 }
+    # Check that each fragment was cutoff after the appropriate amino acid
+    for i, frag in enumerate(fragments[:-1]):
+        if frag[-1] not in cut_after:
+            return False, {
+                "error": "invalid_cutoff",
+                "frag_index": i,
+                "residue": frag[-1],
+                "fragment": frag,
+            }
+    # Check that no fragment begins with the block if next amino acid
+    for i, frag in enumerate(fragments[1:]):
+        if frag[0] in block_if_next:
+            return False, {
+                "error": "blocked_by_next",
+                "frag_index": i + 1,
+                "residue": frag[0],
+                "fragment": frag,
+            }
+    return True, {
+        "errors": [],
+        "total_fragments": len(fragments),
+        "checked_boundaries": len(fragments) - 1,
+    }
 
 
 def reconstruct_from_ordered(fragments: list[str]) -> str:
