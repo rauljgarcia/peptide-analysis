@@ -3,3 +3,16 @@ __pycache__/
 *.pyc
 .env/
 .DS_Store
+
+# --- Notebook rules ---
+# Ignore all notebooks by default
+*.ipynb
+
+# Keep numbered notebooks
+!notebooks/[0-9][0-9]_*.ipynb
+
+# Ignore autosaves and scratch notebooks
+.ipynb_checkpoints/
+*.ipynb~
+scratch_*.ipynb
+temp_*.ipynb
