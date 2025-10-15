@@ -40,6 +40,17 @@ VALID_AMINO_ACIDS = {
 }
 
 
+def _validate_characters(
+    fragment: str, valid_set: set[str], check_position: str
+) -> tuple[bool, dict]:
+    """
+    Helper to validate characters in a fragment.
+    check_position can be 'full', 'end', or 'start' to control what to check.
+    Returns (True, {}) if valid, or (False, error_dict) if not.
+    """
+    pass
+
+
 def validate_ordered_fragments(
     fragments: list[str], *, cut_after: set[str], block_if_next: set[str]
 ) -> tuple[bool, dict]:
