@@ -40,7 +40,7 @@ VALID_AMINO_ACIDS = {
 }
 
 
-def _validate_residues(fragments: list[str], check_position: str) -> tuple[bool, dict]:
+def _validate_residues(fragments: list[str]) -> tuple[bool, dict]:
     """Normalize and verify all fragments contain only valid amino acid residues."""
     if not fragments:
         # The list is empty
@@ -70,8 +70,21 @@ def _validate_residues(fragments: list[str], check_position: str) -> tuple[bool,
     return True, {"normalized": normalized, "total_fragments": len(normalized)}
 
 
+def _validate_rule_set(rule_set: set[str], name: str) -> tuple[bool, dict]:
+    for residue in rule_set:
+        char = rule_set[residue].strip().upper()
+        if char not in VALID_AMINO_ACIDS:
+            return False, {
+                "error": "invalid_residue",
+                "residue_index": residue,
+                "residue": char,
+                "where": name,
+            }
+    return True, {"normalized": {r.strip().upper for r in rule_set}}
+
+
 def validate_ordered_fragments(
-    fragments: list[str], *, cut_after: set[str], block_if_next: set[str]
+    fragments: list[str], *, cut_after: list[str]
 ) -> tuple[bool, dict]:
     """
     Verifies valid fragments based on proper character for the amino acid, and valid
@@ -91,7 +104,14 @@ def validate_ordered_fragments(
     ok, details = _validate_residues(fragments)
     if not ok:
         return False, details
+
     fragments = details["normalized"]
+
+    # Run cut_after residue validation
+    cut_after_ok, cut_after_details = _validate_rule_set(cut_after)
+    if not cut_after_ok:
+        return False, cut_after_details
+    cut_after = details["normalized"]
 
 
 def reconstruct_from_ordered(fragments: list[str]) -> str:
