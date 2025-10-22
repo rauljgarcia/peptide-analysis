@@ -72,7 +72,7 @@ def _validate_residues(fragments: list[str]) -> tuple[bool, dict]:
 
 def _validate_rule_set(rule_set: set[str], name: str) -> tuple[bool, dict]:
     for residue in rule_set:
-        char = rule_set[residue].strip().upper()
+        char = residue.strip().upper()
         if char not in VALID_AMINO_ACIDS:
             return False, {
                 "error": "invalid_residue",
@@ -80,7 +80,7 @@ def _validate_rule_set(rule_set: set[str], name: str) -> tuple[bool, dict]:
                 "residue": char,
                 "where": name,
             }
-    return True, {"normalized": {r.strip().upper for r in rule_set}}
+    return True, {"normalized": {r.strip().upper() for r in rule_set}}
 
 
 def validate_ordered_fragments(
@@ -108,10 +108,16 @@ def validate_ordered_fragments(
     fragments = details["normalized"]
 
     # Run cut_after residue validation
-    cut_after_ok, cut_after_details = _validate_rule_set(cut_after)
+    cut_after_ok, cut_after_details = _validate_rule_set(cut_after, name="cut_after")
     if not cut_after_ok:
         return False, cut_after_details
-    cut_after = details["normalized"]
+    cut_after = cut_after_details["normalized"]
+
+    return True, {
+        "normalized_fragments": fragments,
+        "normalized_cut_after": cut_after,
+        "checked_boundaries": 0,  # placeholder until adding boundary checks
+    }
 
 
 def reconstruct_from_ordered(fragments: list[str]) -> str:
