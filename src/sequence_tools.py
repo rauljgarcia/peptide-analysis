@@ -1,3 +1,6 @@
+from collections.abc import Iterable
+from typing import Optional
+
 """
 sequence_tools.py
 
@@ -76,15 +79,18 @@ def _validate_rule_set(rule_set: set[str], name: str) -> tuple[bool, dict]:
         if char not in VALID_AMINO_ACIDS:
             return False, {
                 "error": "invalid_residue",
-                "residue_index": residue,
                 "residue": char,
+                "input_value": residue,
                 "where": name,
             }
     return True, {"normalized": {r.strip().upper() for r in rule_set}}
 
 
 def validate_ordered_fragments(
-    fragments: list[str], *, cut_after: list[str]
+    fragments: list[str],
+    *,
+    cut_after: Iterable[str],
+    block_if_next: Optional[Iterable[str]]
 ) -> tuple[bool, dict]:
     """
     Verifies valid fragments based on proper character for the amino acid, and valid
@@ -100,23 +106,56 @@ def validate_ordered_fragments(
     dictionary: if False was returned, a message with the error type, and position
         if True, an empty error type and the number of fragments that passed
     """
-    # Run baseline residue validation
+    # baseline residue validation
     ok, details = _validate_residues(fragments)
     if not ok:
         return False, details
 
     fragments = details["normalized"]
 
-    # Run cut_after residue validation
+    # cut_after residue validation
     cut_after_ok, cut_after_details = _validate_rule_set(cut_after, name="cut_after")
     if not cut_after_ok:
         return False, cut_after_details
     cut_after = cut_after_details["normalized"]
 
+    # block_if_next validation
+    if block_if_next:
+        block_ok, block_details = _validate_rule_set(
+            block_if_next, name="block_if_next"
+        )
+        if not block_ok:
+            return False, block_details
+        block_if_next = block_details["normalized"]
+    else:
+        block_if_next = set()
+
+    # check that last residue in each fragment is in the cut_after list
+    for i, frag in enumerate(fragments[:-1]):
+        if frag[-1] not in cut_after:
+            return False, {
+                "error": "invalid_cutoff",
+                "char_index": len(frag) - 1,
+                "fragment": frag,
+                "frag_index": i,
+                "residue": frag[-1],
+            }
+
+    # check that first residue in each fragment is not in the block_if_next list
+    for i, frag in enumerate(fragments[1:]):
+        if frag[0] in block_if_next:
+            return False, {
+                "error": "blocked_by_next",
+                "char_index": 0,
+                "fragment": frag,
+                "frag_index": i + 1,
+                "residue": frag[0],
+            }
+
     return True, {
         "normalized_fragments": fragments,
         "normalized_cut_after": cut_after,
-        "checked_boundaries": 0,  # placeholder until adding boundary checks
+        "checked_boundaries": len(fragments) - 1,
     }
 
 
